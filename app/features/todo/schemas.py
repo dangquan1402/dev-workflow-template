@@ -3,6 +3,8 @@ from enum import Enum
 
 from pydantic import BaseModel, ConfigDict
 
+from app.features.category.schemas import CategoryResponse
+
 
 class TodoStatus(str, Enum):
     pending = "pending"
@@ -19,6 +21,7 @@ class TodoCreate(BaseModel):
     title: str
     description: str | None = None
     user_id: int
+    category_ids: list[int] = []
 
 
 class TodoUpdate(BaseModel):
@@ -27,6 +30,7 @@ class TodoUpdate(BaseModel):
     title: str | None = None
     description: str | None = None
     status: TodoStatus | None = None
+    category_ids: list[int] | None = None
 
 
 # --- Response schemas ---
@@ -40,6 +44,7 @@ class TodoResponse(BaseModel):
     description: str | None
     status: TodoStatus
     user_id: int
+    categories: list[CategoryResponse] = []
     created_at: datetime
     updated_at: datetime
 

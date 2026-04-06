@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.common.database import Base
 from app.common.models import TimestampMixin
+from app.features.category.models import todo_categories
 
 
 class Todo(TimestampMixin, Base):
@@ -19,3 +20,6 @@ class Todo(TimestampMixin, Base):
     )
 
     user = relationship("User", backref="todos")
+    categories = relationship(
+        "Category", secondary=todo_categories, back_populates="todos"
+    )
