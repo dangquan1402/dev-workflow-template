@@ -35,6 +35,35 @@ async def list_todos(
     return schemas.TodoListResponse(items=items, total=total)
 
 
+async def search_todos(
+    db: AsyncSession,
+    *,
+    user_id: int,
+    query: str,
+    status: str | None = None,
+    category_id: int | None = None,
+    skip: int = 0,
+    limit: int = 20,
+) -> schemas.TodoListResponse:
+    items = await crud.todo.search(
+        db,
+        user_id=user_id,
+        query=query,
+        status=status,
+        category_id=category_id,
+        skip=skip,
+        limit=limit,
+    )
+    total = await crud.todo.count_search(
+        db,
+        user_id=user_id,
+        query=query,
+        status=status,
+        category_id=category_id,
+    )
+    return schemas.TodoListResponse(items=items, total=total)
+
+
 async def update_todo(
     db: AsyncSession, db_obj: Todo, todo_in: schemas.TodoUpdate
 ) -> Todo:

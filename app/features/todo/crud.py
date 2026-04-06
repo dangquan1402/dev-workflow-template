@@ -1,6 +1,6 @@
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -134,6 +134,69 @@ class TodoCRUD(GenericCRUD[Todo]):
             )
         if user_id is not None:
             stmt = stmt.where(self.model.user_id == user_id)
+        if status is not None:
+            stmt = stmt.where(self.model.status == status)
+        if category_id is not None:
+            stmt = stmt.join(todo_categories).where(
+                todo_categories.c.category_id == category_id
+            )
+        result = await db.execute(stmt)
+        return result.scalar_one()
+
+    async def search(
+        self,
+        db: AsyncSession,
+        *,
+        user_id: int,
+        query: str,
+        status: str | None = None,
+        category_id: int | None = None,
+        skip: int = 0,
+        limit: int = 20,
+    ) -> list[Todo]:
+        pattern = f"%{query}%"
+        stmt = (
+            select(self.model)
+            .options(selectinload(self.model.categories))
+            .where(self.model.user_id == user_id)
+            .where(
+                or_(
+                    self.model.title.ilike(pattern),
+                    self.model.description.ilike(pattern),
+                )
+            )
+        )
+        if status is not None:
+            stmt = stmt.where(self.model.status == status)
+        if category_id is not None:
+            stmt = stmt.join(todo_categories).where(
+                todo_categories.c.category_id == category_id
+            )
+        stmt = stmt.offset(skip).limit(limit)
+        result = await db.execute(stmt)
+        return list(result.scalars().all())
+
+    async def count_search(
+        self,
+        db: AsyncSession,
+        *,
+        user_id: int,
+        query: str,
+        status: str | None = None,
+        category_id: int | None = None,
+    ) -> int:
+        pattern = f"%{query}%"
+        stmt = (
+            select(func.count())
+            .select_from(self.model)
+            .where(self.model.user_id == user_id)
+            .where(
+                or_(
+                    self.model.title.ilike(pattern),
+                    self.model.description.ilike(pattern),
+                )
+            )
+        )
         if status is not None:
             stmt = stmt.where(self.model.status == status)
         if category_id is not None:
