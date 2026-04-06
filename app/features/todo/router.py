@@ -13,9 +13,7 @@ router = APIRouter()
 @router.post(
     "/", response_model=schemas.TodoResponse, status_code=status.HTTP_201_CREATED
 )
-async def create_todo(
-    todo_in: schemas.TodoCreate, db: AsyncSession = Depends(get_db)
-):
+async def create_todo(todo_in: schemas.TodoCreate, db: AsyncSession = Depends(get_db)):
     user = await user_service.get_user(db, user_id=todo_in.user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -31,7 +29,11 @@ async def list_todos(
 ):
     status_value = todo_status.value if todo_status else None
     return await service.list_todos(
-        db, user_id=user_id, status=status_value, skip=pagination.skip, limit=pagination.limit
+        db,
+        user_id=user_id,
+        status=status_value,
+        skip=pagination.skip,
+        limit=pagination.limit,
     )
 
 

@@ -12,9 +12,7 @@ router = APIRouter()
 @router.post(
     "/", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED
 )
-async def create_user(
-    user_in: schemas.UserCreate, db: AsyncSession = Depends(get_db)
-):
+async def create_user(user_in: schemas.UserCreate, db: AsyncSession = Depends(get_db)):
     existing = await service.get_by_email(db, email=user_in.email)
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
