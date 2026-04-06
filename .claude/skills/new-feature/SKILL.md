@@ -6,76 +6,58 @@ user-invocable: true
 
 Start a new feature following the doc-first pipeline.
 
+## IMPORTANT: Do NOT scan the repo. All patterns are in CLAUDE.md.
+
+Do not use Glob, Grep, or Read to explore existing features. The code templates
+are in CLAUDE.md under "Feature File Templates." Copy them directly, replacing
+`{Entity}`, `{entity}`, `{feature_name}`, `{table_name_plural}` with actual names.
+
 ## Steps
 
 1. Ask the user for:
    - Feature name (short description)
-   - Related issue number (or create one)
+   - Entity name (e.g., "Product", "Comment")
+   - Does it need database tables? (Y/N)
+   - Does it have API endpoints? (Y/N)
 
 2. Create the branch:
    ```
-   git checkout develop
-   git pull origin develop
+   git checkout main
+   git pull origin main
    git checkout -b feature/GH-{issue_number}-{slug}
    ```
 
-3. Determine doc obligations:
-   - Does this feature add new database tables? → Create ERD stub
-   - Does this feature add/change API endpoints? → Create API contract stub
-   - Is there an architectural decision? → Create ADR stub
+3. **DOC PHASE (commit first):**
 
-4. Create doc stubs as needed:
+   If database tables needed, append to `docs/reference/erd.md`:
+   - Add mermaid entity to the diagram
+   - Add table definition with columns, types, constraints
+   - Add indexes
 
-   If ERD needed, append to `docs/reference/erd.md`:
-   ```markdown
-   ## {Feature Name} (GH-{issue_number})
-   <!-- Define tables, columns, relationships, constraints -->
-   ```
+   If API endpoints needed, create `docs/reference/api/{feature-slug}.md`:
+   - Define each endpoint: method, path, request body, response body, errors
+   - Define schema summary table
 
-   If API contract needed, create `docs/reference/api/{feature-slug}.md`:
-   ```markdown
-   # {Feature Name} API
+   If architectural decision, create `docs/decisions/NNNN-{slug}.md`
 
-   ## Endpoints
+   Commit the docs: `docs: define {feature} — ERD and API contract before implementation`
 
-   ### POST /api/v1/{resource}
+4. **CODE PHASE (commit second):**
 
-   **Request:**
-   ```json
-   {}
-   ```
+   Use the templates from CLAUDE.md directly:
+   - Create `app/features/{feature_name}/` directory
+   - `__init__.py` — empty
+   - `models.py` — from CLAUDE.md template
+   - `schemas.py` — from CLAUDE.md RIRO template
+   - `crud.py` — from CLAUDE.md template, add custom queries
+   - `service.py` — from CLAUDE.md template
+   - `router.py` — from CLAUDE.md template
+   - Register router in `app/main.py`
+   - Register model in `alembic/env.py`
 
-   **Response:**
-   ```json
-   {}
-   ```
+   Commit: `feat({feature}): add {feature} with CRUD endpoints`
 
-   **Error codes:**
-   | Status | Meaning |
-   |---|---|
-   | 400 | ... |
-   | 404 | ... |
-   ```
-
-   If ADR needed, create `docs/decisions/NNNN-{slug}.md`:
-   ```markdown
-   # NNNN. {Decision Title}
-
-   Date: {today}
-
-   ## Status
-   Proposed
-
-   ## Context
-   <!-- What is the issue that we're seeing that is motivating this decision? -->
-
-   ## Decision
-   <!-- What is the change that we're proposing? -->
-
-   ## Consequences
-   <!-- What becomes easier or harder as a result? -->
-   ```
-
-5. Report what was created and remind the user:
+5. Remind the user:
    - "Fill in the doc stubs BEFORE writing implementation code"
-   - "Docs and code must ship in the same PR"
+   - "Docs and code ship in the same PR"
+   - "Run `make migrate-create msg='add {table}'` after merging"
