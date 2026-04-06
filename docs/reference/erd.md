@@ -24,7 +24,24 @@ erDiagram
         datetime updated_at
     }
 
+    CATEGORY {
+        int id PK
+        string name
+        string color
+        int user_id FK
+        datetime created_at
+        datetime updated_at
+    }
+
+    TODO_CATEGORIES {
+        int todo_id FK
+        int category_id FK
+    }
+
     USER ||--o{ TODO : "has many"
+    USER ||--o{ CATEGORY : "has many"
+    TODO ||--o{ TODO_CATEGORIES : "tagged with"
+    CATEGORY ||--o{ TODO_CATEGORIES : "applied to"
 ```
 
 ## Tables
@@ -69,6 +86,37 @@ erDiagram
 | todos | user_id | index | Filter todos by user |
 | todos | status | index | Filter todos by status |
 | todos | id | primary key | Default |
+
+### categories
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | Integer | PK, auto-increment | |
+| name | String(100) | not null | Category name |
+| color | String(7) | nullable | Hex color code (e.g. #ff0000) |
+| user_id | Integer | FK -> users.id, not null, indexed | Owner of the category |
+| created_at | DateTime | not null, default now() | TimestampMixin |
+| updated_at | DateTime | not null, default now(), on update now() | TimestampMixin |
+
+### todo_categories (junction table)
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| todo_id | Integer | PK, FK -> todos.id (CASCADE) | |
+| category_id | Integer | PK, FK -> categories.id (CASCADE) | |
+
+### Indexes
+
+| Table | Columns | Type | Purpose |
+|---|---|---|---|
+| users | email | unique | Login lookup |
+| users | id | primary key | Default |
+| todos | user_id | index | Filter todos by user |
+| todos | status | index | Filter todos by status |
+| todos | id | primary key | Default |
+| categories | user_id | index | Filter categories by user |
+| categories | id | primary key | Default |
+| todo_categories | (todo_id, category_id) | composite PK | Unique pairing |
 
 ### Future Tables
 
