@@ -120,6 +120,31 @@ erDiagram
 | categories | id | primary key | Default |
 | todo_categories | (todo_id, category_id) | composite PK | Unique pairing |
 
+### oauth_accounts (GH-23)
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | Integer | PK, auto-increment | |
+| user_id | Integer | FK -> users.id (CASCADE), not null, indexed | Linked local user |
+| provider | String(50) | not null | OAuth provider name: "google", "github" |
+| provider_user_id | String(255) | not null | User ID from the OAuth provider |
+| provider_email | String(255) | nullable | Email from provider (for reference) |
+| access_token | String | nullable | Provider access token (encrypted at rest) |
+| refresh_token | String | nullable | Provider refresh token (encrypted at rest) |
+| created_at | DateTime | not null, default now() | TimestampMixin |
+| updated_at | DateTime | not null, default now(), on update now() | TimestampMixin |
+
+**Unique constraint:** `(provider, provider_user_id)` — one account per provider per user.
+
+### Indexes
+
+| Table | Columns | Type | Purpose |
+|---|---|---|---|
+| oauth_accounts | user_id | index | Find all linked providers for a user |
+| oauth_accounts | (provider, provider_user_id) | unique | Prevent duplicate provider links |
+
+<!-- TODO: Add OAUTH_ACCOUNT entity to mermaid diagram above -->
+
 ### Future Tables
 
 When adding new features, define tables here BEFORE creating the Alembic migration.
