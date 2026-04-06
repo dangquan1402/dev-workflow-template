@@ -39,9 +39,20 @@ erDiagram
         int category_id FK
     }
 
+    COMMENT {
+        int id PK
+        string body
+        int todo_id FK
+        int user_id FK
+        datetime created_at
+        datetime updated_at
+    }
+
     USER ||--o{ TODO : "has many"
     USER ||--o{ CATEGORY : "has many"
+    USER ||--o{ COMMENT : "authored"
     TODO ||--o{ TODO_CATEGORIES : "tagged with"
+    TODO ||--o{ COMMENT : "has many"
     CATEGORY ||--o{ TODO_CATEGORIES : "applied to"
 ```
 
@@ -144,6 +155,25 @@ erDiagram
 | oauth_accounts | (provider, provider_user_id) | unique | Prevent duplicate provider links |
 
 <!-- TODO: Add OAUTH_ACCOUNT entity to mermaid diagram above -->
+
+### comments (GH-25)
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | Integer | PK, auto-increment | |
+| body | Text | not null | Comment content |
+| todo_id | Integer | FK -> todos.id (CASCADE), not null, indexed | Parent todo |
+| user_id | Integer | FK -> users.id (CASCADE), not null, indexed | Comment author |
+| created_at | DateTime | not null, default now() | TimestampMixin |
+| updated_at | DateTime | not null, default now(), on update now() | TimestampMixin |
+
+### Indexes (comments)
+
+| Table | Columns | Type | Purpose |
+|---|---|---|---|
+| comments | todo_id | index | List comments for a todo |
+| comments | user_id | index | List comments by a user |
+| comments | id | primary key | Default |
 
 ### Future Tables
 
