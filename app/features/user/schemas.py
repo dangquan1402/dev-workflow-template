@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr
@@ -28,7 +29,7 @@ class UserUpdate(BaseModel):
 class UserResponse(BaseModel):
     """Single user response. Never includes password."""
 
-    id: int
+    id: uuid.UUID
     email: str
     name: str
     role: str

@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,7 +34,7 @@ async def list_users(
 
 @router.get("/{user_id}", response_model=schemas.UserResponse)
 async def get_user(
-    user_id: int,
+    user_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -44,7 +46,7 @@ async def get_user(
 
 @router.patch("/{user_id}", response_model=schemas.UserResponse)
 async def update_user(
-    user_id: int,
+    user_id: uuid.UUID,
     user_in: schemas.UserUpdate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -69,7 +71,7 @@ async def update_user(
 
 @router.delete("/{user_id}", response_model=schemas.UserResponse)
 async def delete_user(
-    user_id: int,
+    user_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_admin),
 ):

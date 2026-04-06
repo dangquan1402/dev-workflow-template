@@ -1,10 +1,10 @@
 import enum
 
-from sqlalchemy import Boolean, Integer, String
+from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.common.database import Base
-from app.common.models import TimestampMixin
+from app.common.models import TimestampMixin, UUIDMixin
 
 
 class UserRole(str, enum.Enum):
@@ -12,10 +12,9 @@ class UserRole(str, enum.Enum):
     user = "user"
 
 
-class User(TimestampMixin, Base):
+class User(UUIDMixin, TimestampMixin, Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)

@@ -7,20 +7,20 @@ Copy-paste these when creating a new feature. Replace `{Entity}`, `{entity}`, `{
 ## models.py
 
 ```python
-from sqlalchemy import Integer, String, ForeignKey, Boolean
+from sqlalchemy import String, ForeignKey, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.common.database import Base
-from app.common.models import TimestampMixin
+from app.common.models import TimestampMixin, UUIDMixin
 
-class {Entity}(TimestampMixin, Base):
+class {Entity}(UUIDMixin, TimestampMixin, Base):
     __tablename__ = "{table_name_plural}"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    # add columns here
+    # add columns here (id is provided by UUIDMixin)
 ```
 
 ## schemas.py
 
 ```python
+import uuid
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
@@ -33,7 +33,7 @@ class {Entity}Update(BaseModel):
     # fields with | None = None
 
 class {Entity}Response(BaseModel):
-    id: int
+    id: uuid.UUID
     # all readable fields
     created_at: datetime
     updated_at: datetime
@@ -60,6 +60,7 @@ class {Entity}CRUD(GenericCRUD[{Entity}]):
 ## service.py
 
 ```python
+import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from . import crud, schemas
 from .models import {Entity}
@@ -67,7 +68,7 @@ from .models import {Entity}
 async def create_{entity}(db: AsyncSession, obj_in: schemas.{Entity}Create) -> {Entity}:
     return await crud.{entity}.create(db, obj_in=obj_in.model_dump())
 
-async def get_{entity}(db: AsyncSession, id: int) -> {Entity} | None:
+async def get_{entity}(db: AsyncSession, id: uuid.UUID) -> {Entity} | None:
     return await crud.{entity}.get(db, id)
 
 async def list_{entities}(db: AsyncSession, skip: int = 0, limit: int = 20) -> schemas.{Entity}ListResponse:
@@ -79,6 +80,7 @@ async def list_{entities}(db: AsyncSession, skip: int = 0, limit: int = 20) -> s
 ## router.py
 
 ```python
+import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.common.database import get_db
@@ -96,7 +98,7 @@ async def list_{entities}(pagination: PaginationParams = Depends(), db: AsyncSes
     return await service.list_{entities}(db, skip=pagination.skip, limit=pagination.limit)
 
 @router.get("/{id}", response_model=schemas.{Entity}Response)
-async def get_{entity}(id: int, db: AsyncSession = Depends(get_db)):
+async def get_{entity}(id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     obj = await service.get_{entity}(db, id=id)
     if not obj:
         raise HTTPException(status_code=404, detail="{Entity} not found")

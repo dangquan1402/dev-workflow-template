@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
@@ -30,7 +31,7 @@ class OAuthProvidersResponse(BaseModel):
 class OAuthAccountResponse(BaseModel):
     """Single OAuth account linked to a user."""
 
-    id: int
+    id: uuid.UUID
     provider: str
     provider_email: str | None
     created_at: datetime

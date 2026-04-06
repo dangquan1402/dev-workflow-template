@@ -1,3 +1,4 @@
+import uuid
 from typing import Any
 
 from sqlalchemy import func, or_, select
@@ -12,7 +13,7 @@ from .models import Todo
 
 
 class TodoCRUD(GenericCRUD[Todo]):
-    async def get(self, db: AsyncSession, id: int) -> Todo | None:
+    async def get(self, db: AsyncSession, id: uuid.UUID) -> Todo | None:
         result = await db.execute(
             select(self.model)
             .where(self.model.id == id)
@@ -65,7 +66,12 @@ class TodoCRUD(GenericCRUD[Todo]):
         return result.scalar_one()
 
     async def get_by_user(
-        self, db: AsyncSession, user_id: int, *, skip: int = 0, limit: int = 20
+        self,
+        db: AsyncSession,
+        user_id: uuid.UUID,
+        *,
+        skip: int = 0,
+        limit: int = 20,
     ) -> list[Todo]:
         stmt = (
             select(self.model)
@@ -94,9 +100,9 @@ class TodoCRUD(GenericCRUD[Todo]):
         self,
         db: AsyncSession,
         *,
-        user_id: int | None = None,
+        user_id: uuid.UUID | None = None,
         status: str | None = None,
-        category_id: int | None = None,
+        category_id: uuid.UUID | None = None,
         exclude_inactive_users: bool = True,
         skip: int = 0,
         limit: int = 20,
@@ -122,9 +128,9 @@ class TodoCRUD(GenericCRUD[Todo]):
         self,
         db: AsyncSession,
         *,
-        user_id: int | None = None,
+        user_id: uuid.UUID | None = None,
         status: str | None = None,
-        category_id: int | None = None,
+        category_id: uuid.UUID | None = None,
         exclude_inactive_users: bool = True,
     ) -> int:
         stmt = select(func.count()).select_from(self.model)
@@ -147,10 +153,10 @@ class TodoCRUD(GenericCRUD[Todo]):
         self,
         db: AsyncSession,
         *,
-        user_id: int,
+        user_id: uuid.UUID,
         query: str,
         status: str | None = None,
-        category_id: int | None = None,
+        category_id: uuid.UUID | None = None,
         skip: int = 0,
         limit: int = 20,
     ) -> list[Todo]:
@@ -180,10 +186,10 @@ class TodoCRUD(GenericCRUD[Todo]):
         self,
         db: AsyncSession,
         *,
-        user_id: int,
+        user_id: uuid.UUID,
         query: str,
         status: str | None = None,
-        category_id: int | None = None,
+        category_id: uuid.UUID | None = None,
     ) -> int:
         pattern = f"%{query}%"
         stmt = (
