@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.database import get_db
+from app.common.pagination import PaginationParams
 from app.features.user import service as user_service
 
 from . import schemas, service
@@ -23,14 +24,15 @@ async def create_todo(
 
 @router.get("/", response_model=schemas.TodoListResponse)
 async def list_todos(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100),
+    pagination: PaginationParams = Depends(),
     user_id: int | None = Query(None),
     todo_status: schemas.TodoStatus | None = Query(None, alias="status"),
     db: AsyncSession = Depends(get_db),
 ):
     status_value = todo_status.value if todo_status else None
-    return await service.list_todos(db, user_id=user_id, status=status_value, skip=skip, limit=limit)
+    return await service.list_todos(
+        db, user_id=user_id, status=status_value, skip=pagination.skip, limit=pagination.limit
+    )
 
 
 @router.get("/{todo_id}", response_model=schemas.TodoResponse)
