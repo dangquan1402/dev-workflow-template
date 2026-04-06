@@ -13,6 +13,18 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
+
+    TODO {
+        int id PK
+        string title
+        string description
+        string status
+        int user_id FK
+        datetime created_at
+        datetime updated_at
+    }
+
+    USER ||--o{ TODO : "has many"
 ```
 
 ## Tables
@@ -35,6 +47,28 @@ erDiagram
 |---|---|---|---|
 | users | email | unique | Login lookup |
 | users | id | primary key | Default |
+
+### todos
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | Integer | PK, auto-increment | |
+| title | String | not null | Short description of the task |
+| description | String | nullable | Detailed description |
+| status | String | not null, default "pending" | One of: pending, in_progress, done |
+| user_id | Integer | FK → users.id, not null, indexed | Owner of the todo |
+| created_at | DateTime | not null, default now() | TimestampMixin |
+| updated_at | DateTime | not null, default now(), on update now() | TimestampMixin |
+
+### Indexes
+
+| Table | Columns | Type | Purpose |
+|---|---|---|---|
+| users | email | unique | Login lookup |
+| users | id | primary key | Default |
+| todos | user_id | index | Filter todos by user |
+| todos | status | index | Filter todos by status |
+| todos | id | primary key | Default |
 
 ### Future Tables
 
