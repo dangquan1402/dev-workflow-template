@@ -2,6 +2,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.crud import GenericCRUD
+from app.features.user.models import User
 
 from .models import Todo
 
@@ -27,10 +28,13 @@ class TodoCRUD(GenericCRUD[Todo]):
         *,
         user_id: int | None = None,
         status: str | None = None,
+        exclude_inactive_users: bool = True,
         skip: int = 0,
         limit: int = 20,
     ) -> list[Todo]:
         stmt = select(self.model)
+        if exclude_inactive_users:
+            stmt = stmt.join(User, self.model.user_id == User.id).where(User.is_active.is_(True))
         if user_id is not None:
             stmt = stmt.where(self.model.user_id == user_id)
         if status is not None:
@@ -45,8 +49,11 @@ class TodoCRUD(GenericCRUD[Todo]):
         *,
         user_id: int | None = None,
         status: str | None = None,
+        exclude_inactive_users: bool = True,
     ) -> int:
         stmt = select(func.count()).select_from(self.model)
+        if exclude_inactive_users:
+            stmt = stmt.join(User, self.model.user_id == User.id).where(User.is_active.is_(True))
         if user_id is not None:
             stmt = stmt.where(self.model.user_id == user_id)
         if status is not None:
