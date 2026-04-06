@@ -1,6 +1,7 @@
 """OAuth2 business logic: link accounts, create users, generate tokens."""
 
 import secrets
+import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -62,13 +63,13 @@ async def get_or_create_user_from_oauth(
 
 
 async def list_user_oauth_accounts(
-    db: AsyncSession, user_id: int
+    db: AsyncSession, user_id: uuid.UUID
 ) -> list[OAuthAccount]:
     return await crud.oauth_account.get_by_user(db, user_id=user_id)
 
 
 async def unlink_oauth_account(
-    db: AsyncSession, account_id: int, user_id: int
+    db: AsyncSession, account_id: uuid.UUID, user_id: uuid.UUID
 ) -> OAuthAccount | None:
     """Unlink an OAuth account. Returns None if not found/not owned."""
     account = await crud.oauth_account.get(db, account_id)

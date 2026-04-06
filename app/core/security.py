@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta, timezone
 
 from jose import JWTError, jwt
@@ -18,7 +19,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def create_access_token(subject: int | str) -> str:
+def create_access_token(subject: uuid.UUID | str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
@@ -26,7 +27,7 @@ def create_access_token(subject: int | str) -> str:
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
 
 
-def create_refresh_token(subject: int | str) -> str:
+def create_refresh_token(subject: uuid.UUID | str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(
         days=settings.REFRESH_TOKEN_EXPIRE_DAYS
     )
@@ -34,12 +35,12 @@ def create_refresh_token(subject: int | str) -> str:
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
 
 
-def decode_token(token: str, expected_type: str = "access") -> int | None:
+def decode_token(token: str, expected_type: str = "access") -> uuid.UUID | None:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
         if payload.get("type") != expected_type:
             return None
         subject = payload.get("sub")
-        return int(subject) if subject else None
+        return uuid.UUID(subject) if subject else None
     except (JWTError, ValueError):
         return None

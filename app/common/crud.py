@@ -1,3 +1,4 @@
+import uuid
 from typing import Any, Generic, TypeVar
 
 from sqlalchemy import func, select
@@ -14,7 +15,7 @@ class GenericCRUD(Generic[ModelType]):
     def __init__(self, model: type[ModelType]):
         self.model = model
 
-    async def get(self, db: AsyncSession, id: int) -> ModelType | None:
+    async def get(self, db: AsyncSession, id: uuid.UUID) -> ModelType | None:
         result = await db.execute(select(self.model).where(self.model.id == id))
         return result.scalar_one_or_none()
 
@@ -45,7 +46,7 @@ class GenericCRUD(Generic[ModelType]):
         await db.refresh(db_obj)
         return db_obj
 
-    async def delete(self, db: AsyncSession, *, id: int) -> ModelType | None:
+    async def delete(self, db: AsyncSession, *, id: uuid.UUID) -> ModelType | None:
         obj = await self.get(db, id)
         if obj:
             await db.delete(obj)

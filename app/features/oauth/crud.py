@@ -1,4 +1,6 @@
-from sqlalchemy import select
+import uuid
+
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.crud import GenericCRUD
@@ -23,16 +25,14 @@ class OAuthAccountCRUD(GenericCRUD[OAuthAccount]):
         return result.scalar_one_or_none()
 
     async def get_by_user(
-        self, db: AsyncSession, *, user_id: int
+        self, db: AsyncSession, *, user_id: uuid.UUID
     ) -> list[OAuthAccount]:
         result = await db.execute(
             select(self.model).where(self.model.user_id == user_id)
         )
         return list(result.scalars().all())
 
-    async def count_by_user(self, db: AsyncSession, *, user_id: int) -> int:
-        from sqlalchemy import func
-
+    async def count_by_user(self, db: AsyncSession, *, user_id: uuid.UUID) -> int:
         result = await db.execute(
             select(func.count())
             .select_from(self.model)

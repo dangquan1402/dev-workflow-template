@@ -1,3 +1,5 @@
+import uuid
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import hash_password
@@ -16,7 +18,7 @@ async def get_by_email(db: AsyncSession, email: str) -> User | None:
     return await crud.user.get_by_email(db, email=email)
 
 
-async def get_user(db: AsyncSession, user_id: int) -> User | None:
+async def get_user(db: AsyncSession, user_id: uuid.UUID) -> User | None:
     return await crud.user.get(db, user_id)
 
 
