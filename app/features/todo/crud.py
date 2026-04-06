@@ -11,14 +11,24 @@ class TodoCRUD(GenericCRUD[Todo]):
     async def get_by_user(
         self, db: AsyncSession, user_id: int, *, skip: int = 0, limit: int = 20
     ) -> list[Todo]:
-        stmt = select(self.model).where(self.model.user_id == user_id).offset(skip).limit(limit)
+        stmt = (
+            select(self.model)
+            .where(self.model.user_id == user_id)
+            .offset(skip)
+            .limit(limit)
+        )
         result = await db.execute(stmt)
         return list(result.scalars().all())
 
     async def get_by_status(
         self, db: AsyncSession, status: str, *, skip: int = 0, limit: int = 20
     ) -> list[Todo]:
-        stmt = select(self.model).where(self.model.status == status).offset(skip).limit(limit)
+        stmt = (
+            select(self.model)
+            .where(self.model.status == status)
+            .offset(skip)
+            .limit(limit)
+        )
         result = await db.execute(stmt)
         return list(result.scalars().all())
 
@@ -34,7 +44,9 @@ class TodoCRUD(GenericCRUD[Todo]):
     ) -> list[Todo]:
         stmt = select(self.model)
         if exclude_inactive_users:
-            stmt = stmt.join(User, self.model.user_id == User.id).where(User.is_active.is_(True))
+            stmt = stmt.join(User, self.model.user_id == User.id).where(
+                User.is_active.is_(True)
+            )
         if user_id is not None:
             stmt = stmt.where(self.model.user_id == user_id)
         if status is not None:
@@ -53,7 +65,9 @@ class TodoCRUD(GenericCRUD[Todo]):
     ) -> int:
         stmt = select(func.count()).select_from(self.model)
         if exclude_inactive_users:
-            stmt = stmt.join(User, self.model.user_id == User.id).where(User.is_active.is_(True))
+            stmt = stmt.join(User, self.model.user_id == User.id).where(
+                User.is_active.is_(True)
+            )
         if user_id is not None:
             stmt = stmt.where(self.model.user_id == user_id)
         if status is not None:

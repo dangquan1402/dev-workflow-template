@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.database import get_db
+from app.common.pagination import PaginationParams
 
 from . import schemas, service
 
@@ -11,9 +12,7 @@ router = APIRouter()
 @router.post(
     "/", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED
 )
-async def create_user(
-    user_in: schemas.UserCreate, db: AsyncSession = Depends(get_db)
-):
+async def create_user(user_in: schemas.UserCreate, db: AsyncSession = Depends(get_db)):
     existing = await service.get_by_email(db, email=user_in.email)
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -22,11 +21,10 @@ async def create_user(
 
 @router.get("/", response_model=schemas.UserListResponse)
 async def list_users(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100),
+    pagination: PaginationParams = Depends(),
     db: AsyncSession = Depends(get_db),
 ):
-    return await service.list_users(db, skip=skip, limit=limit)
+    return await service.list_users(db, skip=pagination.skip, limit=pagination.limit)
 
 
 @router.get("/{user_id}", response_model=schemas.UserResponse)

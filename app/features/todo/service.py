@@ -20,12 +20,16 @@ async def list_todos(
     skip: int = 0,
     limit: int = 20,
 ) -> schemas.TodoListResponse:
-    items = await crud.todo.get_filtered(db, user_id=user_id, status=status, skip=skip, limit=limit)
+    items = await crud.todo.get_filtered(
+        db, user_id=user_id, status=status, skip=skip, limit=limit
+    )
     total = await crud.todo.count_filtered(db, user_id=user_id, status=status)
     return schemas.TodoListResponse(items=items, total=total)
 
 
-async def update_todo(db: AsyncSession, db_obj: Todo, todo_in: schemas.TodoUpdate) -> Todo:
+async def update_todo(
+    db: AsyncSession, db_obj: Todo, todo_in: schemas.TodoUpdate
+) -> Todo:
     update_data = todo_in.model_dump(exclude_unset=True)
     return await crud.todo.update(db, db_obj=db_obj, obj_in=update_data)
 
