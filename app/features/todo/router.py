@@ -48,6 +48,27 @@ async def list_todos(
     )
 
 
+@router.get("/search", response_model=schemas.TodoListResponse)
+async def search_todos(
+    q: str = Query(..., min_length=1),
+    todo_status: schemas.TodoStatus | None = Query(None, alias="status"),
+    category_id: int | None = Query(None),
+    pagination: PaginationParams = Depends(),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    status_value = todo_status.value if todo_status else None
+    return await service.search_todos(
+        db,
+        user_id=current_user.id,
+        query=q,
+        status=status_value,
+        category_id=category_id,
+        skip=pagination.skip,
+        limit=pagination.limit,
+    )
+
+
 @router.get("/{todo_id}", response_model=schemas.TodoResponse)
 async def get_todo(
     todo_id: int,
