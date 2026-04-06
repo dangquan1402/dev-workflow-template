@@ -8,6 +8,8 @@ from app.core.config import settings
 from app.features.auth.dependencies import get_current_user
 from app.features.user.models import User
 
+from app.features.ws.events import notify_todo_event
+
 from . import schemas, service
 
 _todo_rate_limit = rate_limit(
@@ -26,7 +28,10 @@ async def create_todo(
     db: AsyncSession = Depends(get_db),
 ):
     todo_in = todo_in.model_copy(update={"user_id": current_user.id})
-    return await service.create_todo(db, todo_in=todo_in)
+    todo = await service.create_todo(db, todo_in=todo_in)
+    todo_data = schemas.TodoResponse.model_validate(todo).model_dump(mode="json")
+    await notify_todo_event(current_user.id, "todo.created", todo_data)
+    return todo
 
 
 @router.get("/", response_model=schemas.TodoListResponse)
@@ -95,7 +100,10 @@ async def update_todo(
         raise HTTPException(status_code=404, detail="Todo not found")
     if todo.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not allowed")
-    return await service.update_todo(db, db_obj=todo, todo_in=todo_in)
+    updated = await service.update_todo(db, db_obj=todo, todo_in=todo_in)
+    todo_data = schemas.TodoResponse.model_validate(updated).model_dump(mode="json")
+    await notify_todo_event(current_user.id, "todo.updated", todo_data)
+    return updated
 
 
 @router.delete("/{todo_id}", response_model=schemas.TodoResponse)
@@ -109,4 +117,7 @@ async def delete_todo(
         raise HTTPException(status_code=404, detail="Todo not found")
     if todo.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not allowed")
-    return await service.delete_todo(db, todo_id=todo_id)
+    deleted = await service.delete_todo(db, todo_id=todo_id)
+    todo_data = schemas.TodoResponse.model_validate(deleted).model_dump(mode="json")
+    await notify_todo_event(current_user.id, "todo.deleted", todo_data)
+    return deleted
