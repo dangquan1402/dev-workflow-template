@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.common.database import get_db
 from app.core.security import decode_token
 from app.features.user import service as user_service
-from app.features.user.models import User
+from app.features.user.models import User, UserRole
 
 bearer_scheme = HTTPBearer()
 
@@ -27,3 +27,14 @@ async def get_current_user(
             detail="Invalid or expired token",
         )
     return user
+
+
+async def get_current_admin(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    if current_user.role != UserRole.admin.value:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+    return current_user
