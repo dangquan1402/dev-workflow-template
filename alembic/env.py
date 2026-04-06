@@ -12,6 +12,7 @@ from app.core.config import settings
 from app.features.user.models import User  # noqa: F401
 from app.features.todo.models import Todo  # noqa: F401
 from app.features.category.models import Category, todo_categories  # noqa: F401
+from app.features.oauth.models import OAuthAccount  # noqa: F401
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)

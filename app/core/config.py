@@ -36,6 +36,13 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MINUTE: int = 60
     RATE_LIMIT_AUTH_PER_MINUTE: int = 10
 
+    # OAuth2
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GITHUB_CLIENT_ID: str = ""
+    GITHUB_CLIENT_SECRET: str = ""
+    OAUTH2_REDIRECT_BASE_URL: str = "http://localhost:8000"
+
     # App
     DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
