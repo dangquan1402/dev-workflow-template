@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "if": "Edit(app/**)",
+            "if": "Edit(**/app/**)|Write(**/app/**)",
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/doc-reminder.sh"
           }
         ]

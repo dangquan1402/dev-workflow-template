@@ -14,8 +14,8 @@ if echo "$FILE" | grep -qE '(docs/|tests/|README|CLAUDE|CHANGELOG|\.md$|\.json$|
     exit 0
 fi
 
-# Only remind for actual application code
-if echo "$FILE" | grep -qE '^app/'; then
+# Only remind for actual application code (match both relative and absolute paths)
+if echo "$FILE" | grep -qE '(/|^)app/'; then
     echo "Source file modified: $(basename "$FILE"). Check if related docs need updating." >&2
 fi
 
