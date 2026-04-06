@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     REDIS_HOST: str = "redis"
     REDIS_PORT: int = 6379
 
+    # Rate limiting
+    RATE_LIMIT_PER_MINUTE: int = 60
+    RATE_LIMIT_AUTH_PER_MINUTE: int = 10
+
     # App
     DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
