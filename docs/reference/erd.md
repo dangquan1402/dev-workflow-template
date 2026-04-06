@@ -9,6 +9,7 @@ erDiagram
         string email UK
         string name
         string hashed_password
+        string role
         bool is_active
         datetime created_at
         datetime updated_at
@@ -37,6 +38,7 @@ erDiagram
 | email | String | unique, not null, indexed | Login identifier |
 | name | String | not null | Display name |
 | hashed_password | String | not null | bcrypt hash, never returned in API |
+| role | String(20) | not null, default "user" | One of: admin, user |
 | is_active | Boolean | not null, default true | Soft delete flag |
 | created_at | DateTime | not null, default now() | TimestampMixin |
 | updated_at | DateTime | not null, default now(), on update now() | TimestampMixin |

@@ -19,6 +19,7 @@ class UserUpdate(BaseModel):
 
     name: str | None = None
     email: EmailStr | None = None
+    role: str | None = None
 
 
 # --- Response schemas (what the API returns) ---
@@ -30,6 +31,7 @@ class UserResponse(BaseModel):
     id: int
     email: str
     name: str
+    role: str
     is_active: bool
     created_at: datetime
     updated_at: datetime
