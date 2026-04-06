@@ -27,6 +27,7 @@ async def create_todo(
 async def list_todos(
     pagination: PaginationParams = Depends(),
     todo_status: schemas.TodoStatus | None = Query(None, alias="status"),
+    category_id: int | None = Query(None),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -35,6 +36,7 @@ async def list_todos(
         db,
         user_id=current_user.id,
         status=status_value,
+        category_id=category_id,
         skip=pagination.skip,
         limit=pagination.limit,
     )

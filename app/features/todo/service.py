@@ -17,13 +17,21 @@ async def list_todos(
     *,
     user_id: int | None = None,
     status: str | None = None,
+    category_id: int | None = None,
     skip: int = 0,
     limit: int = 20,
 ) -> schemas.TodoListResponse:
     items = await crud.todo.get_filtered(
-        db, user_id=user_id, status=status, skip=skip, limit=limit
+        db,
+        user_id=user_id,
+        status=status,
+        category_id=category_id,
+        skip=skip,
+        limit=limit,
     )
-    total = await crud.todo.count_filtered(db, user_id=user_id, status=status)
+    total = await crud.todo.count_filtered(
+        db, user_id=user_id, status=status, category_id=category_id
+    )
     return schemas.TodoListResponse(items=items, total=total)
 
 
