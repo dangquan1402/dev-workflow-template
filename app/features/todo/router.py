@@ -3,12 +3,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.database import get_db
 from app.common.pagination import PaginationParams
+from app.common.rate_limit import rate_limit
+from app.core.config import settings
 from app.features.auth.dependencies import get_current_user
 from app.features.user.models import User
 
 from . import schemas, service
 
-router = APIRouter()
+_todo_rate_limit = rate_limit(
+    max_requests=settings.RATE_LIMIT_PER_MINUTE, window_seconds=60
+)
+
+router = APIRouter(dependencies=[Depends(_todo_rate_limit)])
 
 
 @router.post(

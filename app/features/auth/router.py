@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.database import get_db
+from app.common.rate_limit import rate_limit
+from app.core.config import settings
 from app.features.user.models import User
 from app.features.user.schemas import UserResponse
 
@@ -10,9 +12,16 @@ from .dependencies import get_current_user
 
 router = APIRouter()
 
+_auth_rate_limit = rate_limit(
+    max_requests=settings.RATE_LIMIT_AUTH_PER_MINUTE, window_seconds=60
+)
+
 
 @router.post(
-    "/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED
+    "/register",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(_auth_rate_limit)],
 )
 async def register(body: schemas.RegisterRequest, db: AsyncSession = Depends(get_db)):
     from app.features.user import service as user_service
@@ -28,7 +37,11 @@ async def register(body: schemas.RegisterRequest, db: AsyncSession = Depends(get
     )
 
 
-@router.post("/login", response_model=schemas.TokenResponse)
+@router.post(
+    "/login",
+    response_model=schemas.TokenResponse,
+    dependencies=[Depends(_auth_rate_limit)],
+)
 async def login(body: schemas.LoginRequest, db: AsyncSession = Depends(get_db)):
     user = await service.authenticate(db, email=body.email, password=body.password)
     if user is None:
@@ -39,7 +52,11 @@ async def login(body: schemas.LoginRequest, db: AsyncSession = Depends(get_db)):
     return service.create_tokens(user.id)
 
 
-@router.post("/refresh", response_model=schemas.RefreshResponse)
+@router.post(
+    "/refresh",
+    response_model=schemas.RefreshResponse,
+    dependencies=[Depends(_auth_rate_limit)],
+)
 async def refresh(body: schemas.RefreshRequest):
     access_token = service.refresh_access_token(body.refresh_token)
     if access_token is None:
