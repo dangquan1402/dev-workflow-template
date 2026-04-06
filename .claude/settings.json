@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r '.tool_input.command // empty'); if echo \"$CMD\" | grep -qE '^git commit'; then BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null); if [ \"$BRANCH\" = \"main\" ] || [ \"$BRANCH\" = \"develop\" ]; then echo 'Do not commit directly to main or develop. Create a branch first.' >&2; exit 2; fi; fi; exit 0"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // empty'); if echo \"$FILE\" | grep -qvE '(docs/|README|CLAUDE|CHANGELOG|\\.md$)'; then echo 'Source file modified. Verify related documentation is still accurate.' >&2; fi; exit 0"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Review the changes made in this session. Check the current git branch prefix (feature/, bugfix/, hotfix/, refactor/, chore/) and verify the branch-type-specific obligations were met:\n\n- feature/*: Were docs updated in this session? Is there an API spec or ERD if needed?\n- bugfix/*: Was a regression test written? Is the fix minimal?\n- hotfix/*: Is the change minimal? Is there a rollback plan?\n- refactor/*: Do all existing tests still pass? Were any behaviors changed?\n- chore/*: Do tests pass?\n\nReturn {\"ok\": true} if obligations are met, or {\"ok\": false, \"reason\": \"what's missing\"} if not."
+          }
+        ]
+      }
+    ]
+  }
+}

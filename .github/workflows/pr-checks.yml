@@ -1,0 +1,65 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  branch-name:
+    name: Validate Branch Name
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch prefix
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          if ! echo "$BRANCH" | grep -qE '^(feature|bugfix|hotfix|refactor|chore|docs)/'; then
+            echo "::error::Branch name '$BRANCH' must start with feature/, bugfix/, hotfix/, refactor/, chore/, or docs/"
+            exit 1
+          fi
+
+  feature-docs:
+    name: Feature Branch Doc Check
+    runs-on: ubuntu-latest
+    if: startsWith(github.head_ref, 'feature/')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check docs updated
+        run: |
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          HAS_SRC=$(echo "$CHANGED" | grep -v '^docs/' | grep -v '^\.' | grep -v '^README' | head -1 || true)
+          HAS_DOCS=$(echo "$CHANGED" | grep '^docs/' || true)
+          if [ -n "$HAS_SRC" ] && [ -z "$HAS_DOCS" ]; then
+            echo "::warning::Feature PR modifies source code but has no documentation updates in docs/. Please update docs or confirm this is intentional."
+          fi
+
+  hotfix-rollback:
+    name: Hotfix Rollback Plan Check
+    runs-on: ubuntu-latest
+    if: startsWith(github.head_ref, 'hotfix/')
+    steps:
+      - name: Check rollback plan
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            if (!body.toLowerCase().includes('rollback')) {
+              core.setFailed('Hotfix PRs must include a Rollback Plan section');
+            }
+
+  refactor-no-migration:
+    name: Refactor No-Migration Check
+    runs-on: ubuntu-latest
+    if: startsWith(github.head_ref, 'refactor/')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check no migrations
+        run: |
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          if echo "$CHANGED" | grep -qiE '(migration|migrate|alembic|schema)'; then
+            echo "::error::Refactor branches should not include database migrations. If schema changes are needed, use a feature/ branch."
+            exit 1
+          fi

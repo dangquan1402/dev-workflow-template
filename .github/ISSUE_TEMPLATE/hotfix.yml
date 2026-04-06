@@ -1,0 +1,47 @@
+name: "Hotfix"
+description: "Urgent production fix"
+labels: ["critical", "hotfix"]
+body:
+  - type: textarea
+    id: incident
+    attributes:
+      label: Incident Description
+      description: What is broken in production? Include alert/monitoring links.
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: User Impact
+      description: How many users affected? What's the blast radius?
+    validations:
+      required: true
+
+  - type: textarea
+    id: fix
+    attributes:
+      label: Proposed Fix
+      description: What's the smallest change that stops the bleeding?
+    validations:
+      required: true
+
+  - type: textarea
+    id: rollback
+    attributes:
+      label: Rollback Plan
+      description: How do we revert if the fix makes things worse?
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: hotfix-checklist
+    attributes:
+      label: "Hotfix Checklist"
+      options:
+        - label: "Fix is minimal (smallest possible change)"
+        - label: "Smoke test passes"
+        - label: "Rollback plan documented"
+        - label: "Post-mortem ADR written (within 48h after merge)"
+        - label: "Monitoring/alert added to prevent recurrence"
+        - label: "Follow-up issue created (if deeper fix needed)"

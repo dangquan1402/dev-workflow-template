@@ -1,0 +1,39 @@
+name: "Refactor"
+description: "Restructure code without behavior change"
+labels: ["refactor"]
+body:
+  - type: textarea
+    id: why
+    attributes:
+      label: Why Refactor?
+      description: "Concrete reason — not 'cleaner code.' What problem does the current structure cause? (e.g., 'can't add feature X without touching 12 files')"
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What's changing? What's explicitly NOT changing?
+    validations:
+      required: true
+
+  - type: textarea
+    id: approach
+    attributes:
+      label: Approach
+      description: How will you restructure? What's the target architecture?
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: refactor-checklist
+    attributes:
+      label: "Refactor Checklist"
+      options:
+        - label: "ADR written in `docs/decisions/` (justifying the restructure)"
+        - label: "ALL existing tests pass (zero behavior change)"
+        - label: "No new features smuggled in"
+        - label: "API contracts unchanged (same inputs → same outputs)"
+        - label: "ERD unchanged (no schema migration)"
+        - label: "Architecture docs updated if structure changed"

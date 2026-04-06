@@ -1,0 +1,20 @@
+name: "Chore"
+description: "Dependencies, CI, tooling, maintenance"
+labels: ["maintenance"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What needs to be done?
+      description: Describe the maintenance task.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: chore-checklist
+    attributes:
+      label: "Chore Checklist"
+      options:
+        - label: "Tests pass"
+        - label: "CVE number noted (if security-related)"
+        - label: "Breaking changes from dependency upgrade identified"
