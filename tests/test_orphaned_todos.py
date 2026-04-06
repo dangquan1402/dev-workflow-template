@@ -6,7 +6,7 @@ After the fix, it should PASS.
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 from app.features.todo.crud import TodoCRUD
 from app.features.todo.models import Todo
