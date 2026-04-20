@@ -12,17 +12,20 @@ FastAPI + MVC + RIRO architecture with doc-first development workflow.
 | Database schema | @docs/reference/erd.md | When touching models or alembic |
 | API contracts | @docs/reference/api/*.md | When touching routers |
 | Docker / Makefile | @docs/reference/infrastructure.md | On demand |
+| Git workflow & PR flow | @docs/reference/git-workflow.md | When branching or creating PRs |
 | Architecture decisions | @docs/decisions/*.md | On demand |
 
-## Branch Types
+## Branching Model
 
-| Prefix | Commit prefix | SemVer |
-|---|---|---|
-| `feature/*` | `feat(scope):` | MINOR |
-| `bugfix/*` | `fix(scope):` | PATCH |
-| `hotfix/*` | `fix(scope):` | PATCH |
-| `refactor/*` | `refactor(scope):` | None |
-| `chore/*` | `chore(scope):` | None |
+**`main`** = production. **`develop`** = integration. See @docs/reference/git-workflow.md.
+
+| Prefix | Base | Commit prefix | SemVer |
+|---|---|---|---|
+| `feature/*` | `develop` | `feat(scope):` | MINOR |
+| `bugfix/*` | `develop` | `fix(scope):` | PATCH |
+| `hotfix/*` | `main` | `fix(scope):` | PATCH |
+| `refactor/*` | `develop` | `refactor(scope):` | None |
+| `chore/*` | `develop` | `chore(scope):` | None |
 
 Branch naming: `{type}/GH-{issue}-{slug}`
 
