@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from enum import Enum
 
@@ -20,8 +21,8 @@ class TodoCreate(BaseModel):
 
     title: str
     description: str | None = None
-    user_id: int
-    category_ids: list[int] = []
+    user_id: uuid.UUID
+    category_ids: list[uuid.UUID] = []
 
 
 class TodoUpdate(BaseModel):
@@ -30,7 +31,7 @@ class TodoUpdate(BaseModel):
     title: str | None = None
     description: str | None = None
     status: TodoStatus | None = None
-    category_ids: list[int] | None = None
+    category_ids: list[uuid.UUID] | None = None
 
 
 # --- Response schemas ---
@@ -39,11 +40,11 @@ class TodoUpdate(BaseModel):
 class TodoResponse(BaseModel):
     """Single todo response."""
 
-    id: int
+    id: uuid.UUID
     title: str
     description: str | None
     status: TodoStatus
-    user_id: int
+    user_id: uuid.UUID
     categories: list[CategoryResponse] = []
     created_at: datetime
     updated_at: datetime

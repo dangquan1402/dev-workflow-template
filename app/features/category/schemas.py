@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
@@ -11,7 +12,7 @@ class CategoryCreate(BaseModel):
 
     name: str
     color: str | None = None
-    user_id: int = 0  # Set by router from token
+    user_id: uuid.UUID | None = None  # Set by router from token
 
 
 class CategoryUpdate(BaseModel):
@@ -27,10 +28,10 @@ class CategoryUpdate(BaseModel):
 class CategoryResponse(BaseModel):
     """Single category response."""
 
-    id: int
+    id: uuid.UUID
     name: str
     color: str | None
-    user_id: int
+    user_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
 

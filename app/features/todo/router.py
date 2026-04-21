@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -38,7 +40,7 @@ async def create_todo(
 async def list_todos(
     pagination: PaginationParams = Depends(),
     todo_status: schemas.TodoStatus | None = Query(None, alias="status"),
-    category_id: int | None = Query(None),
+    category_id: uuid.UUID | None = Query(None),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -57,7 +59,7 @@ async def list_todos(
 async def search_todos(
     q: str = Query(..., min_length=1),
     todo_status: schemas.TodoStatus | None = Query(None, alias="status"),
-    category_id: int | None = Query(None),
+    category_id: uuid.UUID | None = Query(None),
     pagination: PaginationParams = Depends(),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -76,7 +78,7 @@ async def search_todos(
 
 @router.get("/{todo_id}", response_model=schemas.TodoResponse)
 async def get_todo(
-    todo_id: int,
+    todo_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -90,7 +92,7 @@ async def get_todo(
 
 @router.patch("/{todo_id}", response_model=schemas.TodoResponse)
 async def update_todo(
-    todo_id: int,
+    todo_id: uuid.UUID,
     todo_in: schemas.TodoUpdate,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -108,7 +110,7 @@ async def update_todo(
 
 @router.delete("/{todo_id}", response_model=schemas.TodoResponse)
 async def delete_todo(
-    todo_id: int,
+    todo_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):

@@ -54,6 +54,12 @@ if [ -z "$PROBLEMS" ]; then
     exit 0  # all good, no output, no cost
 else
     # Block Claude from stopping, send reason back
-    echo "{\"decision\": \"block\", \"reason\": \"$PROBLEMS\"}"
+    jq -n --arg reason "$PROBLEMS" '{
+      hookSpecificOutput: {
+        hookEventName: "Stop",
+        decision: "block",
+        reason: $reason
+      }
+    }'
     exit 0
 fi

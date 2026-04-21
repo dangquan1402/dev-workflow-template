@@ -4,6 +4,7 @@ Tests cover: full-text search by title/description, case-insensitivity,
 status and category_id filtering, empty results, and user scoping.
 """
 
+import uuid
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -12,20 +13,24 @@ import pytest
 from app.features.todo import service as todo_service
 from app.features.todo.schemas import TodoListResponse
 
+USER_ID_1 = uuid.UUID("00000000-0000-4000-8000-000000000001")
+USER_ID_2 = uuid.UUID("00000000-0000-4000-8000-000000000002")
+CAT_ID_1 = uuid.UUID("00000000-0000-4000-8000-0000000000c1")
+
 
 def _make_todo(
-    id: int = 1,
+    id: uuid.UUID | None = None,
     title: str = "Test",
     description: str | None = None,
     status: str = "pending",
-    user_id: int = 1,
+    user_id: uuid.UUID | None = None,
 ):
     todo = MagicMock()
-    todo.id = id
+    todo.id = id or uuid.uuid4()
     todo.title = title
     todo.description = description
     todo.status = status
-    todo.user_id = user_id
+    todo.user_id = user_id or USER_ID_1
     todo.categories = []
     todo.created_at = datetime(2026, 1, 1)
     todo.updated_at = datetime(2026, 1, 1)
@@ -51,14 +56,14 @@ class TestSearchTodos:
             ),
         ):
             result = await todo_service.search_todos(
-                mock_db, user_id=1, query="groceries"
+                mock_db, user_id=USER_ID_1, query="groceries"
             )
             assert isinstance(result, TodoListResponse)
             assert result.total == 1
             assert len(result.items) == 1
             mock_search.assert_called_once_with(
                 mock_db,
-                user_id=1,
+                user_id=USER_ID_1,
                 query="groceries",
                 status=None,
                 category_id=None,
@@ -79,7 +84,9 @@ class TestSearchTodos:
                 return_value=1,
             ),
         ):
-            result = await todo_service.search_todos(mock_db, user_id=1, query="milk")
+            result = await todo_service.search_todos(
+                mock_db, user_id=USER_ID_1, query="milk"
+            )
             assert result.total == 1
             assert len(result.items) == 1
 
@@ -97,10 +104,12 @@ class TestSearchTodos:
                 return_value=0,
             ),
         ):
-            await todo_service.search_todos(mock_db, user_id=1, query="GROCERIES")
+            await todo_service.search_todos(
+                mock_db, user_id=USER_ID_1, query="GROCERIES"
+            )
             mock_search.assert_called_once_with(
                 mock_db,
-                user_id=1,
+                user_id=USER_ID_1,
                 query="GROCERIES",
                 status=None,
                 category_id=None,
@@ -122,12 +131,12 @@ class TestSearchTodos:
             ),
         ):
             result = await todo_service.search_todos(
-                mock_db, user_id=1, query="task", status="done"
+                mock_db, user_id=USER_ID_1, query="task", status="done"
             )
             assert result.total == 1
             mock_search.assert_called_once_with(
                 mock_db,
-                user_id=1,
+                user_id=USER_ID_1,
                 query="task",
                 status="done",
                 category_id=None,
@@ -149,15 +158,15 @@ class TestSearchTodos:
             ),
         ):
             result = await todo_service.search_todos(
-                mock_db, user_id=1, query="task", category_id=5
+                mock_db, user_id=USER_ID_1, query="task", category_id=CAT_ID_1
             )
             assert result.total == 1
             mock_search.assert_called_once_with(
                 mock_db,
-                user_id=1,
+                user_id=USER_ID_1,
                 query="task",
                 status=None,
-                category_id=5,
+                category_id=CAT_ID_1,
                 skip=0,
                 limit=20,
             )
@@ -175,7 +184,7 @@ class TestSearchTodos:
             ),
         ):
             result = await todo_service.search_todos(
-                mock_db, user_id=1, query="nonexistent"
+                mock_db, user_id=USER_ID_1, query="nonexistent"
             )
             assert result.total == 0
             assert result.items == []
@@ -193,6 +202,8 @@ class TestSearchTodos:
                 return_value=0,
             ) as mock_count,
         ):
-            await todo_service.search_todos(mock_db, user_id=42, query="anything")
-            assert mock_search.call_args[1]["user_id"] == 42
-            assert mock_count.call_args[1]["user_id"] == 42
+            await todo_service.search_todos(
+                mock_db, user_id=USER_ID_2, query="anything"
+            )
+            assert mock_search.call_args[1]["user_id"] == USER_ID_2
+            assert mock_count.call_args[1]["user_id"] == USER_ID_2

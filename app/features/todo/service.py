@@ -1,3 +1,5 @@
+import uuid
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from . import crud, schemas
@@ -8,16 +10,16 @@ async def create_todo(db: AsyncSession, todo_in: schemas.TodoCreate) -> Todo:
     return await crud.todo.create(db, obj_in=todo_in.model_dump())
 
 
-async def get_todo(db: AsyncSession, todo_id: int) -> Todo | None:
+async def get_todo(db: AsyncSession, todo_id: uuid.UUID) -> Todo | None:
     return await crud.todo.get(db, todo_id)
 
 
 async def list_todos(
     db: AsyncSession,
     *,
-    user_id: int | None = None,
+    user_id: uuid.UUID | None = None,
     status: str | None = None,
-    category_id: int | None = None,
+    category_id: uuid.UUID | None = None,
     skip: int = 0,
     limit: int = 20,
 ) -> schemas.TodoListResponse:
@@ -38,10 +40,10 @@ async def list_todos(
 async def search_todos(
     db: AsyncSession,
     *,
-    user_id: int,
+    user_id: uuid.UUID,
     query: str,
     status: str | None = None,
-    category_id: int | None = None,
+    category_id: uuid.UUID | None = None,
     skip: int = 0,
     limit: int = 20,
 ) -> schemas.TodoListResponse:
@@ -71,5 +73,5 @@ async def update_todo(
     return await crud.todo.update(db, db_obj=db_obj, obj_in=update_data)
 
 
-async def delete_todo(db: AsyncSession, todo_id: int) -> Todo | None:
+async def delete_todo(db: AsyncSession, todo_id: uuid.UUID) -> Todo | None:
     return await crud.todo.delete(db, id=todo_id)

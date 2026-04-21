@@ -1,4 +1,5 @@
 import secrets
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -94,7 +95,7 @@ async def list_accounts(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def unlink_account(
-    account_id: int,
+    account_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):

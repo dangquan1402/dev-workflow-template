@@ -45,11 +45,11 @@ The `data` field contains a serialized `TodoResponse`:
 
 ```json
 {
-  "id": 1,
+  "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
   "title": "Buy milk",
   "description": null,
   "status": "pending",
-  "user_id": 42,
+  "user_id": "550e8400-e29b-41d4-a716-446655440000",
   "categories": [],
   "created_at": "2026-04-06T12:00:00",
   "updated_at": "2026-04-06T12:00:00"

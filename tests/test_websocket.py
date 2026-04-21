@@ -3,11 +3,17 @@
 Tests cover: ConnectionManager, notify_todo_event, and WS router auth.
 """
 
+import uuid
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.features.ws.manager import ConnectionManager
 from app.features.ws.events import notify_todo_event
+
+USER_ID_1 = uuid.UUID("00000000-0000-4000-8000-000000000001")
+USER_ID_2 = uuid.UUID("00000000-0000-4000-8000-000000000002")
+USER_ID_3 = uuid.UUID("00000000-0000-4000-8000-000000000003")
 
 
 # --- ConnectionManager tests ---
@@ -27,61 +33,61 @@ class TestConnectionManager:
 
     @pytest.mark.asyncio
     async def test_connect_accepts_and_stores(self, mgr, mock_ws):
-        await mgr.connect(mock_ws, user_id=1)
+        await mgr.connect(mock_ws, user_id=USER_ID_1)
         mock_ws.accept.assert_awaited_once()
-        assert 1 in mgr.active_connections
-        assert mock_ws in mgr.active_connections[1]
+        assert USER_ID_1 in mgr.active_connections
+        assert mock_ws in mgr.active_connections[USER_ID_1]
 
     @pytest.mark.asyncio
     async def test_connect_multiple_for_same_user(self, mgr):
         ws1 = AsyncMock()
         ws2 = AsyncMock()
-        await mgr.connect(ws1, user_id=1)
-        await mgr.connect(ws2, user_id=1)
-        assert len(mgr.active_connections[1]) == 2
+        await mgr.connect(ws1, user_id=USER_ID_1)
+        await mgr.connect(ws2, user_id=USER_ID_1)
+        assert len(mgr.active_connections[USER_ID_1]) == 2
 
     @pytest.mark.asyncio
     async def test_disconnect_removes_connection(self, mgr, mock_ws):
-        await mgr.connect(mock_ws, user_id=1)
-        mgr.disconnect(mock_ws, user_id=1)
-        assert 1 not in mgr.active_connections
+        await mgr.connect(mock_ws, user_id=USER_ID_1)
+        mgr.disconnect(mock_ws, user_id=USER_ID_1)
+        assert USER_ID_1 not in mgr.active_connections
 
     @pytest.mark.asyncio
     async def test_disconnect_keeps_other_connections(self, mgr):
         ws1 = AsyncMock()
         ws2 = AsyncMock()
-        await mgr.connect(ws1, user_id=1)
-        await mgr.connect(ws2, user_id=1)
-        mgr.disconnect(ws1, user_id=1)
-        assert len(mgr.active_connections[1]) == 1
-        assert ws2 in mgr.active_connections[1]
+        await mgr.connect(ws1, user_id=USER_ID_1)
+        await mgr.connect(ws2, user_id=USER_ID_1)
+        mgr.disconnect(ws1, user_id=USER_ID_1)
+        assert len(mgr.active_connections[USER_ID_1]) == 1
+        assert ws2 in mgr.active_connections[USER_ID_1]
 
     @pytest.mark.asyncio
     async def test_send_to_user(self, mgr, mock_ws):
-        await mgr.connect(mock_ws, user_id=1)
-        msg = {"event": "todo.created", "data": {"id": 1}}
-        await mgr.send_to_user(1, msg)
+        await mgr.connect(mock_ws, user_id=USER_ID_1)
+        msg = {"event": "todo.created", "data": {"id": str(USER_ID_1)}}
+        await mgr.send_to_user(USER_ID_1, msg)
         mock_ws.send_json.assert_awaited_once_with(msg)
 
     @pytest.mark.asyncio
     async def test_send_to_user_no_connections(self, mgr):
         # Should not raise
-        await mgr.send_to_user(999, {"event": "test"})
+        await mgr.send_to_user(uuid.uuid4(), {"event": "test"})
 
     @pytest.mark.asyncio
     async def test_send_to_user_handles_broken_connection(self, mgr):
         ws = AsyncMock()
         ws.send_json = AsyncMock(side_effect=RuntimeError("closed"))
-        await mgr.connect(ws, user_id=1)
+        await mgr.connect(ws, user_id=USER_ID_1)
         # Should not raise despite the error
-        await mgr.send_to_user(1, {"event": "test"})
+        await mgr.send_to_user(USER_ID_1, {"event": "test"})
 
     @pytest.mark.asyncio
     async def test_broadcast(self, mgr):
         ws1 = AsyncMock()
         ws2 = AsyncMock()
-        await mgr.connect(ws1, user_id=1)
-        await mgr.connect(ws2, user_id=2)
+        await mgr.connect(ws1, user_id=USER_ID_1)
+        await mgr.connect(ws2, user_id=USER_ID_2)
         msg = {"event": "todo.created", "data": {}}
         await mgr.broadcast(msg)
         ws1.send_json.assert_awaited_once_with(msg)
@@ -91,10 +97,10 @@ class TestConnectionManager:
     async def test_broadcast_with_exclude(self, mgr):
         ws1 = AsyncMock()
         ws2 = AsyncMock()
-        await mgr.connect(ws1, user_id=1)
-        await mgr.connect(ws2, user_id=2)
+        await mgr.connect(ws1, user_id=USER_ID_1)
+        await mgr.connect(ws2, user_id=USER_ID_2)
         msg = {"event": "todo.created", "data": {}}
-        await mgr.broadcast(msg, exclude_user_id=1)
+        await mgr.broadcast(msg, exclude_user_id=USER_ID_1)
         ws1.send_json.assert_not_awaited()
         ws2.send_json.assert_awaited_once_with(msg)
 
@@ -108,13 +114,13 @@ class TestNotifyTodoEvent:
         with patch(
             "app.features.ws.events.manager.send_to_user", new_callable=AsyncMock
         ) as mock_send:
-            todo_data = {"id": 1, "title": "Test"}
+            todo_data = {"id": str(uuid.uuid4()), "title": "Test"}
             await notify_todo_event(
-                user_id=42, event_type="todo.created", todo_data=todo_data
+                user_id=USER_ID_3, event_type="todo.created", todo_data=todo_data
             )
             mock_send.assert_awaited_once_with(
-                42,
-                {"event": "todo.created", "data": {"id": 1, "title": "Test"}},
+                USER_ID_3,
+                {"event": "todo.created", "data": todo_data},
             )
 
 
@@ -148,7 +154,7 @@ class TestWebSocketAuth:
         user.is_active = False
 
         with (
-            patch("app.features.ws.router.decode_token", return_value=1),
+            patch("app.features.ws.router.decode_token", return_value=USER_ID_1),
             patch(
                 "app.features.ws.router.user_service.get_user",
                 return_value=user,
@@ -170,7 +176,7 @@ class TestWebSocketAuth:
         mock_db = AsyncMock()
 
         with (
-            patch("app.features.ws.router.decode_token", return_value=1),
+            patch("app.features.ws.router.decode_token", return_value=USER_ID_1),
             patch(
                 "app.features.ws.router.user_service.get_user",
                 return_value=None,
@@ -195,12 +201,12 @@ class TestWebSocketAuth:
         mock_db = AsyncMock()
 
         user = MagicMock()
-        user.id = 1
+        user.id = USER_ID_1
         user.is_active = True
         user.role = "user"
 
         with (
-            patch("app.features.ws.router.decode_token", return_value=1),
+            patch("app.features.ws.router.decode_token", return_value=USER_ID_1),
             patch(
                 "app.features.ws.router.user_service.get_user",
                 return_value=user,
@@ -216,5 +222,5 @@ class TestWebSocketAuth:
                 subscribe_all=False,
                 db=mock_db,
             )
-            mock_connect.assert_awaited_once_with(mock_ws, 1)
-            mock_disconnect.assert_called_once_with(mock_ws, 1)
+            mock_connect.assert_awaited_once_with(mock_ws, USER_ID_1)
+            mock_disconnect.assert_called_once_with(mock_ws, USER_ID_1)

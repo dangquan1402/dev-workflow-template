@@ -20,7 +20,7 @@ Create a new user account.
 **Response (201 Created):**
 ```json
 {
-  "id": 1,
+  "id": "550e8400-e29b-41d4-a716-446655440000",
   "email": "user@example.com",
   "name": "Jane Doe",
   "is_active": true,
@@ -103,7 +103,7 @@ Authorization: Bearer <access_token>
 **Response (200 OK):**
 ```json
 {
-  "id": 1,
+  "id": "550e8400-e29b-41d4-a716-446655440000",
   "email": "user@example.com",
   "name": "Jane Doe",
   "is_active": true,

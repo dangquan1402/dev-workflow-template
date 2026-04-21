@@ -24,10 +24,10 @@ Create a new category for the authenticated user.
 
 ```json
 {
-  "id": 1,
+  "id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
   "name": "Work",
   "color": "#ff0000",
-  "user_id": 1,
+  "user_id": "550e8400-e29b-41d4-a716-446655440000",
   "created_at": "2026-04-06T00:00:00",
   "updated_at": "2026-04-06T00:00:00"
 }
@@ -50,10 +50,10 @@ List categories for the authenticated user (paginated).
 {
   "items": [
     {
-      "id": 1,
+      "id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
       "name": "Work",
       "color": "#ff0000",
-      "user_id": 1,
+      "user_id": "550e8400-e29b-41d4-a716-446655440000",
       "created_at": "2026-04-06T00:00:00",
       "updated_at": "2026-04-06T00:00:00"
     }
@@ -121,7 +121,7 @@ When creating or updating a todo, pass `category_ids` in the request body:
 ```json
 {
   "title": "My task",
-  "category_ids": [1, 2]
+  "category_ids": ["b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e", "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f"]
 }
 ```
 
@@ -130,5 +130,5 @@ When creating or updating a todo, pass `category_ids` in the request body:
 Use the `category_id` query parameter on `GET /api/v1/todos`:
 
 ```
-GET /api/v1/todos?category_id=1
+GET /api/v1/todos?category_id=b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e
 ```

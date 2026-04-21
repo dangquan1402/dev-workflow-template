@@ -1,3 +1,5 @@
+import uuid
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import (
@@ -26,7 +28,7 @@ async def authenticate(db: AsyncSession, email: str, password: str) -> User | No
     return user
 
 
-def create_tokens(user_id: int) -> dict[str, str]:
+def create_tokens(user_id: uuid.UUID) -> dict[str, str]:
     return {
         "access_token": create_access_token(user_id),
         "refresh_token": create_refresh_token(user_id),

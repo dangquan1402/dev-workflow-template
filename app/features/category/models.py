@@ -1,8 +1,11 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Table
+import uuid
+
+from sqlalchemy import Column, ForeignKey, String, Table
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.common.database import Base
-from app.common.models import TimestampMixin
+from app.common.models import TimestampMixin, UUIDMixin
 
 # Many-to-many junction table
 todo_categories = Table(
@@ -10,27 +13,26 @@ todo_categories = Table(
     Base.metadata,
     Column(
         "todo_id",
-        Integer,
+        UUID(as_uuid=True),
         ForeignKey("todos.id", ondelete="CASCADE"),
         primary_key=True,
     ),
     Column(
         "category_id",
-        Integer,
+        UUID(as_uuid=True),
         ForeignKey("categories.id", ondelete="CASCADE"),
         primary_key=True,
     ),
 )
 
 
-class Category(TimestampMixin, Base):
+class Category(UUIDMixin, TimestampMixin, Base):
     __tablename__ = "categories"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     color: Mapped[str | None] = mapped_column(String(7), nullable=True)
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id"), nullable=False, index=True
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
     )
 
     user = relationship("User", backref="categories")

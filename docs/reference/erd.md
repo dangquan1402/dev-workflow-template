@@ -5,7 +5,7 @@ Update this file BEFORE writing migrations. The ERD is the spec — code impleme
 ```mermaid
 erDiagram
     USER {
-        int id PK
+        uuid id PK
         string email UK
         string name
         string hashed_password
@@ -16,27 +16,27 @@ erDiagram
     }
 
     TODO {
-        int id PK
+        uuid id PK
         string title
         string description
         string status
-        int user_id FK
+        uuid user_id FK
         datetime created_at
         datetime updated_at
     }
 
     CATEGORY {
-        int id PK
+        uuid id PK
         string name
         string color
-        int user_id FK
+        uuid user_id FK
         datetime created_at
         datetime updated_at
     }
 
     TODO_CATEGORIES {
-        int todo_id FK
-        int category_id FK
+        uuid todo_id FK
+        uuid category_id FK
     }
 
     USER ||--o{ TODO : "has many"
@@ -51,7 +51,7 @@ erDiagram
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
-| id | Integer | PK, auto-increment | |
+| id | UUID | PK, default uuid4 | |
 | email | String | unique, not null, indexed | Login identifier |
 | name | String | not null | Display name |
 | hashed_password | String | not null | bcrypt hash, never returned in API |
@@ -71,11 +71,11 @@ erDiagram
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
-| id | Integer | PK, auto-increment | |
+| id | UUID | PK, default uuid4 | |
 | title | String | not null | Short description of the task |
 | description | String | nullable | Detailed description |
 | status | String | not null, default "pending" | One of: pending, in_progress, done |
-| user_id | Integer | FK → users.id, not null, indexed | Owner of the todo |
+| user_id | UUID | FK → users.id, not null, indexed | Owner of the todo |
 | created_at | DateTime | not null, default now() | TimestampMixin |
 | updated_at | DateTime | not null, default now(), on update now() | TimestampMixin |
 
@@ -93,10 +93,10 @@ erDiagram
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
-| id | Integer | PK, auto-increment | |
+| id | UUID | PK, default uuid4 | |
 | name | String(100) | not null | Category name |
 | color | String(7) | nullable | Hex color code (e.g. #ff0000) |
-| user_id | Integer | FK -> users.id, not null, indexed | Owner of the category |
+| user_id | UUID | FK -> users.id, not null, indexed | Owner of the category |
 | created_at | DateTime | not null, default now() | TimestampMixin |
 | updated_at | DateTime | not null, default now(), on update now() | TimestampMixin |
 
@@ -104,8 +104,8 @@ erDiagram
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
-| todo_id | Integer | PK, FK -> todos.id (CASCADE) | |
-| category_id | Integer | PK, FK -> categories.id (CASCADE) | |
+| todo_id | UUID | PK, FK -> todos.id (CASCADE) | |
+| category_id | UUID | PK, FK -> categories.id (CASCADE) | |
 
 ### Indexes
 
@@ -124,8 +124,8 @@ erDiagram
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
-| id | Integer | PK, auto-increment | |
-| user_id | Integer | FK -> users.id (CASCADE), not null, indexed | Linked local user |
+| id | UUID | PK, default uuid4 | |
+| user_id | UUID | FK -> users.id (CASCADE), not null, indexed | Linked local user |
 | provider | String(50) | not null | OAuth provider name: "google", "github" |
 | provider_user_id | String(255) | not null | User ID from the OAuth provider |
 | provider_email | String(255) | nullable | Email from provider (for reference) |

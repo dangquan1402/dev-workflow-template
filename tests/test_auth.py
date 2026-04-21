@@ -4,6 +4,8 @@ Tests cover: registration, login, token refresh, /me endpoint,
 and auth dependency behavior.
 """
 
+import uuid
+
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 
@@ -15,6 +17,10 @@ from app.core.security import (
     verify_password,
 )
 from app.features.auth import service as auth_service
+
+USER_ID_1 = uuid.UUID("00000000-0000-4000-8000-000000000001")
+USER_ID_2 = uuid.UUID("00000000-0000-4000-8000-000000000002")
+USER_ID_3 = uuid.UUID("00000000-0000-4000-8000-000000000003")
 
 
 # --- Security utility tests ---
@@ -34,21 +40,21 @@ class TestPasswordHashing:
 
 class TestTokenCreation:
     def test_access_token_roundtrip(self):
-        token = create_access_token(42)
+        token = create_access_token(USER_ID_1)
         user_id = decode_token(token, expected_type="access")
-        assert user_id == 42
+        assert user_id == USER_ID_1
 
     def test_refresh_token_roundtrip(self):
-        token = create_refresh_token(42)
+        token = create_refresh_token(USER_ID_1)
         user_id = decode_token(token, expected_type="refresh")
-        assert user_id == 42
+        assert user_id == USER_ID_1
 
     def test_access_token_rejected_as_refresh(self):
-        token = create_access_token(42)
+        token = create_access_token(USER_ID_1)
         assert decode_token(token, expected_type="refresh") is None
 
     def test_refresh_token_rejected_as_access(self):
-        token = create_refresh_token(42)
+        token = create_refresh_token(USER_ID_1)
         assert decode_token(token, expected_type="access") is None
 
     def test_invalid_token_returns_none(self):
@@ -121,26 +127,28 @@ class TestAuthenticate:
 
 class TestCreateTokens:
     def test_returns_access_and_refresh(self):
-        tokens = auth_service.create_tokens(1)
+        tokens = auth_service.create_tokens(USER_ID_1)
         assert "access_token" in tokens
         assert "refresh_token" in tokens
         assert tokens["token_type"] == "bearer"
 
     def test_tokens_are_valid(self):
-        tokens = auth_service.create_tokens(99)
-        assert decode_token(tokens["access_token"], expected_type="access") == 99
-        assert decode_token(tokens["refresh_token"], expected_type="refresh") == 99
+        tokens = auth_service.create_tokens(USER_ID_2)
+        assert decode_token(tokens["access_token"], expected_type="access") == USER_ID_2
+        assert (
+            decode_token(tokens["refresh_token"], expected_type="refresh") == USER_ID_2
+        )
 
 
 class TestRefreshAccessToken:
     def test_valid_refresh_returns_new_access(self):
-        refresh = create_refresh_token(5)
+        refresh = create_refresh_token(USER_ID_3)
         new_access = auth_service.refresh_access_token(refresh)
         assert new_access is not None
-        assert decode_token(new_access, expected_type="access") == 5
+        assert decode_token(new_access, expected_type="access") == USER_ID_3
 
     def test_access_token_rejected_for_refresh(self):
-        access = create_access_token(5)
+        access = create_access_token(USER_ID_3)
         assert auth_service.refresh_access_token(access) is None
 
     def test_invalid_token_returns_none(self):

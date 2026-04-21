@@ -13,18 +13,18 @@ Create a new todo.
 {
   "title": "Write unit tests",
   "description": "Cover the user service layer",
-  "user_id": 1
+  "user_id": "550e8400-e29b-41d4-a716-446655440000"
 }
 ```
 
 **Response (201 Created):**
 ```json
 {
-  "id": 1,
+  "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
   "title": "Write unit tests",
   "description": "Cover the user service layer",
   "status": "pending",
-  "user_id": 1,
+  "user_id": "550e8400-e29b-41d4-a716-446655440000",
   "created_at": "2026-04-06T12:00:00Z",
   "updated_at": "2026-04-06T12:00:00Z"
 }
@@ -47,7 +47,7 @@ List todos with pagination and filtering.
 |---|---|---|---|
 | skip | int | 0 | Offset |
 | limit | int | 20 | Max items (cap at 100) |
-| user_id | int | null | Filter by owner |
+| user_id | uuid | null | Filter by owner |
 | status | string | null | Filter by status: pending, in_progress, done |
 
 **Response (200 OK):**
@@ -55,11 +55,11 @@ List todos with pagination and filtering.
 {
   "items": [
     {
-      "id": 1,
+      "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       "title": "Write unit tests",
       "description": "Cover the user service layer",
       "status": "pending",
-      "user_id": 1,
+      "user_id": "550e8400-e29b-41d4-a716-446655440000",
       "created_at": "2026-04-06T12:00:00Z",
       "updated_at": "2026-04-06T12:00:00Z"
     }

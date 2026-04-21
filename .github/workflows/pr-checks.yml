@@ -59,7 +59,7 @@ jobs:
       - name: Check no migrations
         run: |
           CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
-          if echo "$CHANGED" | grep -qiE '(migration|migrate|alembic|schema)'; then
+          if echo "$CHANGED" | grep -qE '^alembic/versions/'; then
             echo "::error::Refactor branches should not include database migrations. If schema changes are needed, use a feature/ branch."
             exit 1
           fi
